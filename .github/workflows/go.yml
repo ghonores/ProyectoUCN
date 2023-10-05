@@ -33,3 +33,23 @@ jobs:
         name: Go-results-${{ matrix.go-version }}
         path: TestResults-${{ matrix.go-version }}.json
 #      run: go test -v ./...
+
+  # Test downloading both artifacts at once
+    - name: Download all Artifacts
+      uses: ./
+      with:
+        path: some/other/path
+
+    - name: Verify successful download
+      run: |
+        $fileA = "some/other/path/Artifact-A/file-A.txt"
+        $fileB = "some/other/path/Artifact-B/file-B.txt"
+        if(!(Test-Path -path $fileA) -or !(Test-Path -path $fileB))
+        {
+            Write-Error "Expected files do not exist"
+        }
+        if(!((Get-Content $fileA) -ceq "Lorem ipsum dolor sit amet") -or !((Get-Content $fileB) -ceq "Hello world from file B"))
+        {
+            Write-Error "File contents of downloaded artifacts are incorrect"
+        }
+      shell: pwsh
